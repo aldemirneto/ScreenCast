@@ -69,7 +69,7 @@ Para usar o banco de dados ScreenCast, você pode criar um novo banco de dados P
 1. Conecte-se ao seu servidor PostgreSQL usando a ferramenta de linha de comando `psql`.
 2. Crie um novo banco de dados usando o comando `CREATE DATABASE`.
 3. Conecte-se ao novo banco de dados usando o comando `\c`.
-4. Copie e cole o script SQL de `ScreenCast.sql` no terminal `psql`.
+4. Copie e cole o script SQL de [`ScreenCast.sql`](ScreenCast.sql) no terminal `psql`.
 5. Execute o script para criar o banco de dados e as tabelas.
 6. Crie novos usuários com diferentes níveis de acesso usando os comandos `CREATE USER` e `GRANT`.
 
@@ -90,4 +90,4 @@ Este projeto está licenciado sob a Licença MIT - consulte o arquivo [LICENSE](
 
 ## Agradecimentos
 
-Este projeto foi criado como parte da disciplina Projetos I na Universidade IFSP. Agradecimentos especiais à Professora Andreia por sua orientação e suporte ao longo do projeto.
+Este projeto foi criado como parte da disciplina Projetos I no IFSP-Piracicaba. Agradecimentos especiais à Professora Andreia por sua orientação e suporte ao longo do projeto.
