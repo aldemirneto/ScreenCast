@@ -22,7 +22,7 @@ public partial class User
     public string Password { get; set; } = null!;
 
     [Column("is_subscribed")]
-    public bool? IsSubscribed { get; set; }
+    public bool IsSubscribed { get; set; }
 
     [Column("created_at", TypeName = "timestamp(3) without time zone")]
     public DateTime CreatedAt { get; set; }
