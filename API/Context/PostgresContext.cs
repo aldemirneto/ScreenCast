@@ -5,9 +5,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace API.Context;
 
-public partial class MySQLContext : DbContext
+public partial class PostgresContext : DbContext
 {
-    public MySQLContext(DbContextOptions<MySQLContext> options)
+    public PostgresContext(DbContextOptions<PostgresContext> options)
         : base(options)
     {
     }
