@@ -7,59 +7,44 @@ O banco de dados ScreenCast é um banco de dados PostgreSQL que armazena informa
 O esquema do banco de dados inclui as seguintes tabelas e colunas:
 
 
-     +--------------------+          +--------------+
-     | Subscription       |          | Users        |
-     +--------------------+          +--------------+
-     | idSubscription     | <----+   | idUser       |
-     | idUser             |          | username     |
-     | subscription_begin |          | password     |
-     | subscription_end   |          | signs        |
-     | payment_infos      |          | created_at   |
-     | description        |          +--------------+
-     +--------------------+
-           |
-           |
-           v
+   +---------------------+           +--------------------------+
+   |        User         |           |       Recordings         |
+   +---------------------+           +--------------------------+
+   |    id: uuid         |     +-----|    id: uuid              |
+   |    email: VARCHAR   |     |     |    user_id: uuid         |
+   |    password: VARCHAR|-----+     |    created_at: TIMESTAMP |
+   |    is_subscribed:   |           |    finished_at: TIMESTAMP|
+   |    BOOLEAN          |           +--------------------------+
+   |    created_at:      |
+   |    TIMESTAMP        |
+   +---------------------+
 
-     +---------------+          +--------------+
-     | Recordings    |          | Status       |
-     +---------------+          +--------------+
-     | idRecordings  | <-------+| idStatus     |
-     | Recording_Url |          | description  |
-     | idUser        |          +--------------+
-     | idStatus      |
-     | created_at    |
-     +---------------+
+              
+               
+               
+              
+              
+                    
+          
 
-### Subscription
+ 
 
-- `idSubscription` (integer): Identificador único para cada assinatura.
-- `idUser` (integer): ID do usuário que se inscreveu.
-- `subscription_begin` (timestamp): Carimbo de data/hora para quando a assinatura começou.
-- `subscription_end` (timestamp): Carimbo de data/hora para quando a assinatura termina.
-- `payment_infos` (text): Informações de pagamento para a assinatura.
-- `description` (varchar(500)): Descrição da assinatura.
 
 ### Users
 
-- `idUser` (integer): Identificador único para cada usuário.
-- `username` (varchar): Nome de usuário para o usuário.
+- `id` (UUID): Identificador único para cada usuário.
+- `email` (varchar): Nome de usuário para o usuário.
 - `password` (varchar): Senha criptografada para o usuário.
-- `signs` (boolean): Se o usuário concordou com os termos e condições.
+- `is_subscribed ` (boolean): Se o usuário concordou com os termos e condições.
 - `created_at` (timestamp): Carimbo de data/hora para quando a conta do usuário foi criada.
 
 ### Recordings
 
-- `idRecordings` (integer): Identificador único para cada gravação.
-- `Recording_Url` (varchar(500)): URL para a gravação.
-- `idUser` (integer): ID do usuário que gravou o vídeo.
-- `idStatus` (integer): ID do status da gravação.
+- `id` (UUID): Identificador único para cada gravação.
+- `user_id` (UUID): ID do usuário que gravou o vídeo.  
 - `created_at` (timestamp): Carimbo de data/hora para quando a gravação foi criada.
+- `finished_at` (timestamp): Carimbo de data/hora para quando a gravação foi encerrada.
 
-### Status
-
-- `idStatus` (integer): Identificador único para cada status.
-- `description` (varchar): Descrição do status.
 
 
 ## Uso
