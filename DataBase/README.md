@@ -1,25 +1,24 @@
 # Banco de Dados ScreenCast
 
-O banco de dados ScreenCast é um banco de dados PostgreSQL que armazena informações sobre assinaturas de usuários, gravações e status. Ele inclui quatro tabelas: `Subscription`, `Users`, `Recordings` e `Status`.
+O banco de dados ScreenCast é um banco de dados PostgreSQL que armazena informações sobre assinaturas de usuários, gravações e status. Ele inclui quatro tabelas:  `Users`, `Recordings`.
 
 ## Esquema
 
 O esquema do banco de dados inclui as seguintes tabelas e colunas:
 
+```
+   +-------------------------+           +--------------------------+
+   |        User             |           |       Recordings         |
+   +-------------------------+           +--------------------------+
+   |    id: uuid             |     +-----|    id: uuid              |
+   |    email: VARCHAR       |     |     |    user_id: uuid         |
+   |    password: VARCHAR    |-----+     |    created_at: TIMESTAMP |
+   |    is_subscribed:       |           |    finished_at: TIMESTAMP|
+   |    BOOLEAN              |           +--------------------------+
+   |    created_at:TIMESTAMP |
+   +-------------------------+
 
-   +---------------------+           +--------------------------+
-   |        User         |           |       Recordings         |
-   +---------------------+           +--------------------------+
-   |    id: uuid         |     +-----|    id: uuid              |
-   |    email: VARCHAR   |     |     |    user_id: uuid         |
-   |    password: VARCHAR|-----+     |    created_at: TIMESTAMP |
-   |    is_subscribed:   |           |    finished_at: TIMESTAMP|
-   |    BOOLEAN          |           +--------------------------+
-   |    created_at:      |
-   |    TIMESTAMP        |
-   +---------------------+
-
-              
+```              
                
                
               
