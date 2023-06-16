@@ -1,0 +1,10 @@
+<header class="bg-dark">
+	<nav class="container navbar navbar-expand-lg navbar-dark bg-dark pt-4 pb-4">
+		<ul class="navbar-nav ms-auto mt-2 mt-lg-0">
+			<li class="nav-item">
+				<a *ngIf="!isUserLoggedIn" routerLink="/login" class="nav-link btn-login">Login</a>
+				<a *ngIf="isUserLoggedIn" routerLink="/logout" class="nav-link btn-login">Olá, {{ userName }}</a>
+			</li>
+		</ul>
+	</nav>
+</header>

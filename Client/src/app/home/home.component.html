@@ -1,2 +1,26 @@
-<p>home works!</p>
-<fa-icon class="me-2" [icon]="['fas', 'check']"></fa-icon>
+<app-header></app-header>
+
+<div class="pt-5 pb-5 bg-light" style="min-height: calc(100vh);">
+	<section class="container mt-5">
+		<div class="card">
+			<!-- <div class="card-header">
+				
+			</div> -->
+			<div class="card-body text-center">
+				<!-- <button class="btn btn-danger" [ngbPopover]="popContent">
+					<fa-icon class="me-2" [icon]="['fas', 'video']"></fa-icon>Iniciar gravação
+				</button> -->
+
+				<ng-template #popContent>
+					<button class="btn btn-danger" (click)="startRecording()">
+						<fa-icon class="me-2" [icon]="['fas', 'computer']"></fa-icon>Iniciar gravação local
+					</button>
+					<button class="btn btn-danger">
+						<fa-icon class="me-2" [icon]="['fas', 'server']"></fa-icon>Iniciar gravação no servidor
+					</button>
+				</ng-template>
+			</div>
+		</div>
+
+	</section>
+</div>
