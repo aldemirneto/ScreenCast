@@ -1,6 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { DateTime } from 'luxon';
-import * as signalR from '@microsoft/signalr';
+import { RecordingServiceService } from '../services/recording-service.service';
+import { HttpEvent, HttpEventType } from '@angular/common/http';
+import { catchError, last, map, tap } from 'rxjs';
+import Swal from 'sweetalert2';
+import { TokenService } from '../services/token.service';
+import { UserService } from '../services/user.service';
+import { env } from 'process';
+import { environment } from 'src/environments/environment';
 
 @Component({
 	selector: 'app-home',
@@ -14,7 +21,12 @@ export class HomeComponent implements OnInit {
 
 	public startedAt: DateTime | undefined;
 
-	private hubConnection: signalR.HubConnection | undefined;
+	public isServerRecording: boolean = false;
+
+	public isUploading: boolean = false;
+	public uploadProgress: number = 0;
+
+	public showUploadSuccess: boolean = false;
 
 	public get recordingDuration(): string {
 		if (!this.startedAt) {
@@ -24,16 +36,50 @@ export class HomeComponent implements OnInit {
 		const duration = DateTime.now().diff(this.startedAt);
 		return duration.toFormat('hh:mm:ss');
 	}
+
+	public get isLoggedIn(): boolean {
+		return this.tokenService.getJwtToken() !== null;
+	}
+
+	public get isSubscribed(): boolean {
+		return this.tokenService.getUserInfo()?.isSubscribed ?? false;
+	}
+
+	public get userId(): string {
+		return this.tokenService.getUserInfo()?.id ?? '';
+	}
+
+	public recordings: { id: string, createdAt: string }[] = [];
+
+	public baseUrl: string = environment.baseUrl;
 	
-	constructor() { }
+	constructor(private recordingService: RecordingServiceService, private tokenService: TokenService, private userService: UserService) { }
 
 	ngOnInit(): void {
 		setInterval(() => {
 			this.startedAt = this.startedAt;
 		}, 1000);
+
+		if (this.isLoggedIn) {
+			this.loadRecordings();		
+		}
 	}
 
-	startRecording() {
+	loadRecordings() {
+		this.recordingService.getRecordings().subscribe({
+			next: (recordings) => {
+				this.recordings = recordings;
+			},
+			error: () => {
+				Swal.fire('Ocorreu um erro', 'Não foi possível carregar as gravações', 'error');
+			}
+		});
+	}
+
+	startRecording(isServerRecording: boolean) {
+		this.isServerRecording = isServerRecording;
+		this.showUploadSuccess = false;
+
 		navigator.mediaDevices.getDisplayMedia({ video: true })
 			.then((stream: MediaStream) => {
 				this.recordedChunks = [];
@@ -57,13 +103,45 @@ export class HomeComponent implements OnInit {
 
 	saveRecording() {
 		const blob = new Blob(this.recordedChunks, { type: 'video/webm' });
-		const url = window.URL.createObjectURL(blob);
-		const a = document.createElement('a');
-		a.href = url;
-		a.download = 'screen-recording.webm';
-		document.body.appendChild(a);
-		a.click();
-		window.URL.revokeObjectURL(url);
+
+		if (this.isServerRecording) {
+			this.isUploading = true;
+			this.uploadProgress = 0;
+
+			this.recordingService.uploadFile(blob).pipe(
+				tap(message => this.showProgress(message)),
+				last(),
+				catchError(error => {
+					Swal.fire('Ocorreu um erro', error.error.message ?? 'Não foi possível salvar a gravação', 'error');
+					this.isUploading = false;
+					return error;
+				})
+				).subscribe({
+					next: () => {
+						console.log('upload complete');
+						this.isUploading = false;
+						this.showUploadSuccess = true;
+
+						this.loadRecordings();
+					}
+				});
+		} else {
+			const url = window.URL.createObjectURL(blob);
+			const a = document.createElement('a');
+			a.href = url;
+			a.download = 'screen-recording.webm';
+			document.body.appendChild(a);
+			a.click();
+			window.URL.revokeObjectURL(url);
+		}
+	}
+
+	showProgress(message: HttpEvent<unknown>) {
+		if (message.type == HttpEventType.UploadProgress) {
+			const loaded = message.loaded;
+			const total = message.total!;
+			this.uploadProgress = Math.round(100 * loaded / total);
+		}
 	}
 
 	stopRecording() {
@@ -71,5 +149,21 @@ export class HomeComponent implements OnInit {
 		this.mediaRecorder?.stream.getTracks().forEach(track => track.stop());
 		
 		this.startedAt = undefined;
+	}
+
+	subscribe() {
+		this.userService.subscribe().subscribe({
+			next: () => {
+				Swal.fire('Sucesso', 'Obrigado por assinar nosso serviço!', 'success');
+				this.tokenService.setUserSubscribed();
+			},
+			error: (error) => {
+				Swal.fire('Ocorreu um erro', 'Não possível assinar o serviço, tente novamente mais tarde.', 'error');
+			}
+		});
+	}
+
+	formatDate(date: string) {
+		return DateTime.fromISO(date).toFormat('dd/MM/yyyy HH:mm:ss');
 	}
 }

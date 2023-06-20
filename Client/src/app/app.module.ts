@@ -6,9 +6,11 @@ import { AppComponent } from './app.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { HomeComponent } from './home/home.component';
 import { FaIconLibrary, FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-import { faCheck, faCircleStop, faCloudArrowUp, faComputer, faHouseLaptop, faServer, faVideo } from '@fortawesome/free-solid-svg-icons';
+import { faCashRegister, faCheck, faCircleStop, faCloudArrowUp, faComputer, faHouseLaptop, faServer, faVideo, faWallet } from '@fortawesome/free-solid-svg-icons';
 import { HeaderComponent } from './header/header.component';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
+import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
+import { AuthInterceptor } from './services/auth.interceptor';
 
 @NgModule({
 	declarations: [
@@ -21,9 +23,13 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 		AppRoutingModule,
 		BrowserAnimationsModule,
 		FontAwesomeModule,
-		NgbModule
+		NgbModule,
+		HttpClientModule
 	],
-	providers: [],
+	providers: [
+		AuthInterceptor,
+		{ provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
+	],
 	bootstrap: [AppComponent]
 })
 export class AppModule {
@@ -35,6 +41,9 @@ export class AppModule {
 			faCloudArrowUp,
 			faHouseLaptop,
 			faCircleStop,
+			faCheck,
+			faWallet,
+			faCashRegister,
 		)
 	}
 }
