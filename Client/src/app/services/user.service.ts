@@ -1,5 +1,6 @@
 import { HttpClient, HttpHeaders, HttpRequest } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
 
 @Injectable({
@@ -11,9 +12,9 @@ export class UserService {
 
 	constructor(private http: HttpClient) { }
 
-	login(email: string, password: string) {
+	login(email: string, password: string): Observable<{ createdAt: string, expiresAt: string, accessToken: string }> {
 		const body = { email, password };
-		return this.http.post(`${this.baseUrl}/login`, body);
+		return this.http.post<{ createdAt: string, expiresAt: string, accessToken: string }>(`${this.baseUrl}/login`, body);
 	}
 
 	register(email: string, password: string) {

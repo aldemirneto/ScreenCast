@@ -11,12 +11,15 @@ import { HeaderComponent } from './header/header.component';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { AuthInterceptor } from './services/auth.interceptor';
+import { LoginComponent } from './login/login.component';
+import { ReactiveFormsModule } from '@angular/forms';
 
 @NgModule({
 	declarations: [
 		AppComponent,
 		HomeComponent,
-		HeaderComponent
+		HeaderComponent,
+  LoginComponent
 	],
 	imports: [
 		BrowserModule,
@@ -24,7 +27,8 @@ import { AuthInterceptor } from './services/auth.interceptor';
 		BrowserAnimationsModule,
 		FontAwesomeModule,
 		NgbModule,
-		HttpClientModule
+		HttpClientModule,
+		ReactiveFormsModule
 	],
 	providers: [
 		AuthInterceptor,
