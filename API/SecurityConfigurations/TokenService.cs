@@ -14,6 +14,7 @@ namespace API.SecurityConfigurations {
 			JwtSecurityTokenHandler tokenHandler = new();
 			ClaimsIdentity identity = new(new Claim[] {
 					new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+					new Claim(ClaimTypes.Role, user.IsSubscribed.ToString()),
 					new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString("N"))
 				});
 
