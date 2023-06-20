@@ -3,22 +3,35 @@
 <div class="pt-5 pb-5 bg-light" style="min-height: calc(100vh);">
 	<section class="container mt-5">
 		<div class="card">
-			<!-- <div class="card-header">
-				
-			</div> -->
-			<div class="card-body text-center">
-				<!-- <button class="btn btn-danger" [ngbPopover]="popContent">
+			<div class="card-body text-center" *ngIf="mediaRecorder?.state !== 'recording'">
+				<button class="btn btn-danger" [ngbPopover]="popContent" popoverClass="popover shadow">
 					<fa-icon class="me-2" [icon]="['fas', 'video']"></fa-icon>Iniciar gravação
-				</button> -->
+				</button>
 
 				<ng-template #popContent>
-					<button class="btn btn-danger" (click)="startRecording()">
-						<fa-icon class="me-2" [icon]="['fas', 'computer']"></fa-icon>Iniciar gravação local
-					</button>
-					<button class="btn btn-danger">
-						<fa-icon class="me-2" [icon]="['fas', 'server']"></fa-icon>Iniciar gravação no servidor
-					</button>
+					<div class="row">
+						<div class="col-12 col-lg-6">
+							<button class="btn btn-outline-danger" (click)="startRecording()">
+								<fa-icon class="me-2" [icon]="['fas', 'house-laptop']"></fa-icon>Iniciar gravação local
+							</button>
+						</div>
+						<div class="col-12 col-lg-6">
+							<button class="btn btn-outline-danger">
+								<fa-icon class="me-2" [icon]="['fas', 'cloud-arrow-up']"></fa-icon>Iniciar gravação na nuvem
+							</button>
+						</div>
+					</div>
 				</ng-template>
+			</div>
+
+			<div class="card-body text-center" *ngIf="mediaRecorder?.state === 'recording'">
+				<div class="mb-2">
+					<span class="recording me-2"></span>
+					<span>{{ recordingDuration }}</span>
+				</div>
+				<button class="btn btn-danger" (click)="stopRecording()">
+					<fa-icon class="me-2" [icon]="['fas', 'circle-stop']"></fa-icon>Parar gravação
+				</button>
 			</div>
 		</div>
 

@@ -1,0 +1,22 @@
+.recording {
+	font-family: verdana, sans-serif;
+	color: firebrick;
+	display: inline-block;
+	line-height: 1.5em;
+}
+
+.recording::before {
+	content: '🔴';
+	left: 5px;
+	animation: recording 600ms alternate infinite;
+}
+
+@keyframes recording {
+	from {
+		opacity: 1;
+	}
+
+	to {
+		opacity: 0.2;
+	}
+}
