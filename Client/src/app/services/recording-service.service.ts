@@ -10,6 +10,7 @@ import { Recording } from '../models/recording.model';
 export class RecordingServiceService {
 
 	private baseUrl: string = `${environment.baseUrl}/api/recording`;
+	private recordingBaseUrl: string = `${environment.baseUrl}/recordings`;
 
 	constructor(private http: HttpClient) { }
 
@@ -22,6 +23,14 @@ export class RecordingServiceService {
 		formData.append('file', file);
 
 		const request = new HttpRequest('POST', this.baseUrl, formData, {
+			reportProgress: true
+		});
+		return this.http.request(request);
+	}
+
+	downloadRecording(id: string, userId: string) {
+		const request = new HttpRequest('GET', `${this.recordingBaseUrl}/${userId}/${id}.webm`, {
+			responseType: 'blob',
 			reportProgress: true
 		});
 		return this.http.request(request);

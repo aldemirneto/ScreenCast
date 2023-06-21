@@ -72,7 +72,8 @@
 										{{ formatDate(recording.createdAt) }}
 									</div>
 									<div>
-										<button (click)="removeRecording(recording)" class="btn btn-danger"><fa-icon class="me-2" [icon]="['fas', 'trash']"></fa-icon>Remover</button>
+										<button #downloadBtn (click)="downloadRecording(recording, downloadBtn)" class="btn btn-outline-info mx-1" ngbTooltip="Download"><fa-icon [icon]="['fas', 'download']"></fa-icon></button>
+										<button #removeBtn (click)="removeRecording(recording, removeBtn)" class="btn btn-outline-danger mx-1" ngbTooltip="Remover"><fa-icon [icon]="['fas', 'trash']"></fa-icon></button>
 									</div>
 								</div>
 								<div class="card-body">

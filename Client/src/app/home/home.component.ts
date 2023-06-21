@@ -9,6 +9,8 @@ import { UserService } from '../services/user.service';
 import { env } from 'process';
 import { environment } from 'src/environments/environment';
 import { Recording } from '../models/recording.model';
+import * as download from 'downloadjs';
+import { ButtonLoading } from '../button-loading';
 
 @Component({
 	selector: 'app-home',
@@ -168,7 +170,7 @@ export class HomeComponent implements OnInit {
 		return DateTime.fromISO(date).toFormat('dd/MM/yyyy HH:mm:ss');
 	}
 
-	removeRecording(recording: Recording) {
+	removeRecording(recording: Recording, button: HTMLButtonElement) {
 		Swal.fire({
 			title: 'Tem certeza?',
 			text: 'Você não poderá reverter essa ação!',
@@ -178,6 +180,7 @@ export class HomeComponent implements OnInit {
 			cancelButtonText: 'Cancelar'
 		}).then((result) => {
 			if (result.isConfirmed) {
+				const btnLoading = new ButtonLoading(button);
 				this.recordingService.removeRecording(recording.id).subscribe({
 					next: () => {
 						Swal.fire({
@@ -197,8 +200,26 @@ export class HomeComponent implements OnInit {
 					error: () => {
 						Swal.fire('Ocorreu um erro', 'Não foi possível remover a gravação.', 'error');
 					}
-				});
+				}).add(() => btnLoading.remove());
 			}
 		});
+	}
+
+	downloadRecording(recording: Recording, button: HTMLButtonElement) {
+		const btnLoading = new ButtonLoading(button);
+		
+		this.recordingService.downloadRecording(recording.id, this.userId).pipe(
+			last(),
+			catchError(error => {
+				Swal.fire('Ocorreu um erro', error.error.message ?? 'Não foi possível baixar a gravação', 'error');
+				btnLoading.remove();
+				return error;
+			})
+			).subscribe({
+				next: (value: any) => {
+					download(value.body, `${recording.createdAt}.webm`, "video/webm");
+					btnLoading.remove();
+				}
+			});
 	}
 }
