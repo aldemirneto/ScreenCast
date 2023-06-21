@@ -1,0 +1,42 @@
+<div class="pt-5 pb-5 bg-light" style="min-height: calc(100vh);">
+	<section class="container mt-5" style="max-width: 500px;">
+
+		<div class="align-items-center d-flex justify-content-center">
+			<img style="max-width: 200px;" src="/assets/icon.png" alt="">
+			<h2>ScreenCast</h2>
+		</div>
+
+		<h4>Registre-se</h4>
+		
+		<form [formGroup]="registerForm" (ngSubmit)="register()">
+			<div class="mb-3">
+				<label for="email" class="form-label">Email</label>
+				
+				<div class="input-group has-validation">
+					<input type="email" class="form-control shadow-none" [ngClass]="{'is-invalid': registerForm.controls['email'].errors && registerForm.controls['email'].dirty}" id="email" formControlName="email" placeholder="Digite seu email">
+
+					<div class="invalid-feedback">
+						<div *ngIf="registerForm.controls['email'].errors?.['required']">Este campo é obrigatório.</div>
+					</div>
+				</div>
+			</div>
+			<div class="mb-3">
+				<label for="password" class="form-label">Senha</label>
+
+				<div class="input-group has-validation">
+					<input type="password" class="form-control shadow-none" [ngClass]="{'is-invalid': registerForm.controls['password'].errors && registerForm.controls['password'].dirty}"  id="password" formControlName="password" placeholder="Digite sua senha">
+
+					<div class="invalid-feedback">
+						<div *ngIf="registerForm.controls['password'].errors?.['required']">Este campo é obrigatório.</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="mb-3">
+				Já possui uma conta? <a routerLink="/login">Faça login aqui</a>.
+			</div>
+
+			<button id="register-btn" type="submit" class="btn btn-primary">Entrar</button>
+		</form>
+	</section>
+</div>

@@ -52,8 +52,8 @@ export class LoginComponent implements OnInit {
 				})
 				this.router.navigate(["/"]);
 			},
-			error: () => {
-
+			error: (error) => {
+				Swal.fire('Ocorreu um erro', error.error?.message ?? 'Não foi possível realizar o login.', 'error');
 			}
 		}).add(() => {
 			this.loginForm.enable();

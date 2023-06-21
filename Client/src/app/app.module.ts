@@ -13,13 +13,15 @@ import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { AuthInterceptor } from './services/auth.interceptor';
 import { LoginComponent } from './login/login.component';
 import { ReactiveFormsModule } from '@angular/forms';
+import { RegisterComponent } from './register/register.component';
 
 @NgModule({
 	declarations: [
 		AppComponent,
 		HomeComponent,
 		HeaderComponent,
-  LoginComponent
+  LoginComponent,
+  RegisterComponent
 	],
 	imports: [
 		BrowserModule,
