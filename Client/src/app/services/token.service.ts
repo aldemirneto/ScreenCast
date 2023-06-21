@@ -13,6 +13,7 @@ export class TokenService {
 
 	signOut(): void {
 		this.cookieService.delete(this.SESSION_TOKEN, '/');
+		this.cookieService.delete(this.USER_INFO, '/');
 	}
 
 	saveJwtToken(token: string, expiration: string): void {

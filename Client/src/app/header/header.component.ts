@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { TokenService } from '../services/token.service';
 
 @Component({
 	selector: 'app-header',
@@ -7,10 +8,11 @@ import { Component, OnInit } from '@angular/core';
 })
 export class HeaderComponent implements OnInit {
 
-	public isUserLoggedIn: boolean = false;
-	public userName: string = 'Pessoa Legal';
+	public get isUserLoggedIn(): boolean {
+		return this.tokenService.getJwtToken() !== null;
+	}
 	
-	constructor() { }
+	constructor(private tokenService: TokenService) { }
 
 	ngOnInit(): void {
 	}

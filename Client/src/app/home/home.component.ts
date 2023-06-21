@@ -8,6 +8,7 @@ import { TokenService } from '../services/token.service';
 import { UserService } from '../services/user.service';
 import { env } from 'process';
 import { environment } from 'src/environments/environment';
+import { Recording } from '../models/recording.model';
 
 @Component({
 	selector: 'app-home',
@@ -49,7 +50,7 @@ export class HomeComponent implements OnInit {
 		return this.tokenService.getUserInfo()?.id ?? '';
 	}
 
-	public recordings: { id: string, createdAt: string }[] = [];
+	public recordings: Recording[] = [];
 
 	public baseUrl: string = environment.baseUrl;
 	
@@ -165,5 +166,39 @@ export class HomeComponent implements OnInit {
 
 	formatDate(date: string) {
 		return DateTime.fromISO(date).toFormat('dd/MM/yyyy HH:mm:ss');
+	}
+
+	removeRecording(recording: Recording) {
+		Swal.fire({
+			title: 'Tem certeza?',
+			text: 'Você não poderá reverter essa ação!',
+			icon: 'warning',
+			showCancelButton: true,
+			confirmButtonText: 'Remover',
+			cancelButtonText: 'Cancelar'
+		}).then((result) => {
+			if (result.isConfirmed) {
+				this.recordingService.removeRecording(recording.id).subscribe({
+					next: () => {
+						Swal.fire({
+							icon: 'success',
+							title: 'Gravação removida',
+							toast: true,
+							position: 'top-end',
+							timer: 3000,
+							timerProgressBar: true,
+							showConfirmButton: false
+						});
+
+						const index = this.recordings.findIndex(r => r.id == recording.id);
+						this.recordings.splice(index, 1);
+						this.recordings = [...this.recordings];
+					},
+					error: () => {
+						Swal.fire('Ocorreu um erro', 'Não foi possível remover a gravação.', 'error');
+					}
+				});
+			}
+		});
 	}
 }

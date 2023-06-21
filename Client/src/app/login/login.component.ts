@@ -49,7 +49,7 @@ export class LoginComponent implements OnInit {
 					timer: 3000,
 					timerProgressBar: true,
 					showConfirmButton: false
-				})
+				});
 				this.router.navigate(["/"]);
 			},
 			error: (error) => {

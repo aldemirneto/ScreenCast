@@ -26,6 +26,22 @@
 					<fa-icon class="me-2" [icon]="['fas', 'video']"></fa-icon>Iniciar gravação
 				</button>
 
+				<div>
+					<div class="mt-3 text-start d-flex justify-content-center">
+						<div class="form-check mx-2">
+							<input class="form-check-input shadow-none" type="checkbox" id="recordMic">
+							<label class="form-check-label user-select-none" for="recordMic">Gravar microfone?</label>
+						</div>
+	
+						<div class="form-check mx-2">
+							<input class="form-check-input shadow-none" type="checkbox" id="recordWebcam">
+							<label class="form-check-label user-select-none" for="recordWebcam">Gravar webcam?</label>
+						</div>
+	
+					</div>
+
+				</div>
+
 				<ng-template #popContent>
 					<div class="row">
 						<div class="col-12 col-lg-6">
@@ -43,12 +59,21 @@
 					</div>
 				</ng-template>
 
-				<div class="mt-3" *ngIf="recordings.length > 0">
+				<div *ngIf="recordings.length > 0">
+					<hr class="my-5">
+
+					<h5>Gravações anteriores</h5>
+
 					<div class="row">
 						<div *ngFor="let recording of recordings" class="col-12 col-md-6">
 							<div class="card my-3">
-								<div class="card-header header-dark">
-									{{ formatDate(recording.createdAt) }}
+								<div class="card-header header-dark d-flex align-items-center justify-content-between py-2">
+									<div>
+										{{ formatDate(recording.createdAt) }}
+									</div>
+									<div>
+										<button (click)="removeRecording(recording)" class="btn btn-danger"><fa-icon class="me-2" [icon]="['fas', 'trash']"></fa-icon>Remover</button>
+									</div>
 								</div>
 								<div class="card-body">
 									<video controls class="w-100" [src]="baseUrl + '/recordings/' + userId + '/' + recording.id + '.webm'"></video>
