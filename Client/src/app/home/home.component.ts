@@ -11,6 +11,7 @@ import { environment } from 'src/environments/environment';
 import { Recording } from '../models/recording.model';
 import * as download from 'downloadjs';
 import { ButtonLoading } from '../button-loading';
+import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
 
 @Component({
 	selector: 'app-home',
@@ -30,15 +31,9 @@ export class HomeComponent implements OnInit {
 	public uploadProgress: number = 0;
 
 	public showUploadSuccess: boolean = false;
+	public hasBeenSaved: boolean = false;
 
-	public get recordingDuration(): string {
-		if (!this.startedAt) {
-			return '00:00:00';
-		}
-
-		const duration = DateTime.now().diff(this.startedAt);
-		return duration.toFormat('hh:mm:ss');
-	}
+	public recordingDuration: string = '00:00:00';
 
 	public get isLoggedIn(): boolean {
 		return this.tokenService.getJwtToken() !== null;
@@ -54,13 +49,27 @@ export class HomeComponent implements OnInit {
 
 	public recordings: Recording[] = [];
 
+	public recordMicForm: FormGroup;
+
 	public baseUrl: string = environment.baseUrl;
 	
-	constructor(private recordingService: RecordingServiceService, private tokenService: TokenService, private userService: UserService) { }
+	constructor(_formBuilder: FormBuilder, private recordingService: RecordingServiceService, private tokenService: TokenService, private userService: UserService) {
+		this.recordMicForm = _formBuilder.group({
+			recordMic: [false],
+			echoCancellation: [true],
+			noiseSuppression: [true],
+		});
+	}
 
 	ngOnInit(): void {
 		setInterval(() => {
-			this.startedAt = this.startedAt;
+			if (!this.startedAt) {
+				this.recordingDuration = '00:00:00';
+				return;
+			}
+
+			const duration = DateTime.now().diff(this.startedAt);
+			this.recordingDuration = duration.toFormat('hh:mm:ss');
 		}, 1000);
 
 		if (this.isLoggedIn) {
@@ -79,32 +88,52 @@ export class HomeComponent implements OnInit {
 		});
 	}
 
-	startRecording(isServerRecording: boolean) {
+	async startRecording(isServerRecording: boolean) {
 		this.isServerRecording = isServerRecording;
 		this.showUploadSuccess = false;
+		this.hasBeenSaved = false;
+		
+		let audioStreams: MediaStreamTrack[] = [];
+		const micControls = this.recordMicForm.controls;
+		if (micControls['recordMic'].value) {
+			const mediaConstraints: MediaStreamConstraints = {
+				audio: {
+					echoCancellation: micControls['echoCancellation'].value,
+					noiseSuppression: micControls['noiseSuppression'].value,
+					sampleRate: 44100,
+				}
+			};
 
-		navigator.mediaDevices.getDisplayMedia({ video: true })
-			.then((stream: MediaStream) => {
-				this.recordedChunks = [];
+			try {
+				audioStreams = (await navigator.mediaDevices.getUserMedia(mediaConstraints)).getTracks();
+			} catch (error) {
+				Swal.fire('Ocorreu um erro', 'Permissão para utilizar o microfone não concedida.', 'error');
+				return;
+			}
+		}
 
-				this.mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm; codecs=vp9' });
-				this.mediaRecorder.ondataavailable = (event) => {
-					if (event.data && event.data.size > 0) {
-						console.log(`pushing data`)
-						this.recordedChunks.push(event.data);
+		const displayStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+		displayStream.addEventListener('inactive', () => {
+			this.stopRecording();
+		});
 
-						this.saveRecording();
-					}
-				};
-				this.mediaRecorder.start();
-				this.startedAt = DateTime.now();
-			})
-			.catch((error) => {
-				console.error('Error accessing media devices.', error);
-			});
+		this.recordedChunks = [];
+
+		const combinedStream = new MediaStream([...displayStream.getTracks(), ...audioStreams]);
+
+		this.mediaRecorder = new MediaRecorder(combinedStream, { mimeType: 'video/webm; codecs=vp9' });
+		this.mediaRecorder.ondataavailable = (event) => {
+			if (event.data && event.data.size > 0) {
+				this.recordedChunks.push(event.data);
+			}
+		};
+		this.mediaRecorder.onstop = this.stopRecording.bind(this);
+		this.mediaRecorder.start(200);
+		this.startedAt = DateTime.now();
 	}
 
 	saveRecording() {
+		this.hasBeenSaved = true;
 		const blob = new Blob(this.recordedChunks, { type: 'video/webm' });
 
 		if (this.isServerRecording) {
@@ -150,8 +179,12 @@ export class HomeComponent implements OnInit {
 	stopRecording() {
 		this.mediaRecorder?.stop();
 		this.mediaRecorder?.stream.getTracks().forEach(track => track.stop());
-		
+
 		this.startedAt = undefined;
+
+		if (!this.hasBeenSaved) {
+			this.saveRecording();
+		}
 	}
 
 	subscribe() {
