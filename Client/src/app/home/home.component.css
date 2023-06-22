@@ -1,0 +1,29 @@
+.recording {
+	font-family: verdana, sans-serif;
+	color: firebrick;
+	display: inline-block;
+	line-height: 1.5em;
+}
+
+.recording::before {
+	content: '🔴';
+	left: 5px;
+	animation: recording 600ms alternate infinite;
+}
+
+@keyframes recording {
+	from {
+		opacity: 1;
+	}
+
+	to {
+		opacity: 0.2;
+	}
+}
+
+.header-dark {
+	padding-top: 1rem !important;
+	padding-bottom: 1rem !important;
+	color: #FFF !important;
+	background-color: #2D2F33 !important;
+}

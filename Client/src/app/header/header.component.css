@@ -1,0 +1,12 @@
+
+.btn-login {
+    color: goldenrod!important;
+    font-weight: lighter;
+    font-size: x-large;
+    text-align: center;
+	transition: 0.3s;
+}
+
+.btn-login:hover {
+    opacity: 0.5;
+}

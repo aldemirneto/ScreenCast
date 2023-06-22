@@ -3,12 +3,23 @@ using API.SecurityConfigurations;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+
+builder.Services.AddCors(options => {
+	options.AddDefaultPolicy(build => {
+		build
+			.WithOrigins(builder.Configuration.GetSection("CorsSettings:Origins").Get<string[]>())
+			.AllowAnyMethod()
+			.AllowAnyHeader()
+			.AllowCredentials();
+	});
+});
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -61,11 +72,20 @@ if (app.Environment.IsDevelopment()) {
 	app.UseSwaggerUI();
 }
 
+
+app.UseCors();
+
 app.UseHttpsRedirection();
+
+app.UseStaticFiles(new StaticFileOptions {
+	FileProvider = new PhysicalFileProvider(Environment.GetEnvironmentVariable("RecordingsBaseDir")),
+	RequestPath = "/recordings"
+});
 
 app.UseAuthentication();
 
 app.UseAuthorization();
+
 
 app.MapControllers();
 

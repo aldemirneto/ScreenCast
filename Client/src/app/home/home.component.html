@@ -1,2 +1,108 @@
-<p>home works!</p>
-<fa-icon class="me-2" [icon]="['fas', 'check']"></fa-icon>
+<app-header></app-header>
+
+<div class="pt-5 pb-5 bg-light" style="min-height: calc(100vh);">
+	<section class="container mt-5">
+		<div class="card">
+			<div *ngIf="isUploading" class="card-body text-center my-3">
+				Fazendo upload...
+				<ngb-progressbar [showValue]="true" type="primary" [value]="uploadProgress" [max]="100" [striped]="true"></ngb-progressbar>
+			</div>
+
+			<div class="card-body text-center" *ngIf="mediaRecorder?.state !== 'recording'">
+				<div class="alert alert-info my-3" *ngIf="isLoggedIn && !isSubscribed" role="alert">
+					<fa-icon class="me-2" [icon]="['fas', 'wallet']"></fa-icon>Assine nosso serviço para fazer uploads maiores de 200MB!!!!! Apenas R$ 100,00/mês.
+
+					<div class="mt-3">
+						<button (click)="subscribe()" class="btn btn-success"><fa-icon class="me-2" [icon]="['fas', 'cash-register']"></fa-icon>Assinar</button>
+					</div>
+				</div>
+
+				<div class="alert alert-success alert-dismissible" *ngIf="showUploadSuccess" role="alert">
+					<fa-icon class="me-2" [icon]="['fas', 'check']"></fa-icon>Upload realizado com sucesso!
+					<button (click)="showUploadSuccess = false" type="button" class="btn-close shadow-none" data-bs-dismiss="alert" aria-label="Close"></button>
+				</div>
+
+				<button [disabled]="isUploading" class="btn btn-danger" [ngbPopover]="popContent" popoverClass="popover shadow">
+					<fa-icon class="me-2" [icon]="['fas', 'video']"></fa-icon>Iniciar gravação
+				</button>
+
+				<div>
+					<form [formGroup]="recordMicForm">
+						<div class="mt-3 text-start d-flex justify-content-center">
+							<div class="form-check mx-2">
+								<input formControlName="recordMic" class="form-check-input shadow-none" type="checkbox" id="recordMic">
+								<label class="form-check-label user-select-none" for="recordMic">Gravar microfone?</label>
+							</div>
+						</div>
+
+						<div *ngIf="recordMicForm.controls['recordMic'].value" class="mt-2 text-start d-flex justify-content-center">
+							<div class="form-check mx-2">
+								<input formControlName="echoCancellation" class="form-check-input shadow-none" type="checkbox" id="echoCancellation">
+								<label class="form-check-label user-select-none" for="echoCancellation">Ativar cancelamento de eco?</label>
+							</div>
+
+							<div class="form-check mx-2">
+								<input formControlName="noiseSuppression" class="form-check-input shadow-none" type="checkbox" id="noiseSuppression">
+								<label class="form-check-label user-select-none" for="noiseSuppression">Ativar supressão de ruído?</label>
+							</div>
+						</div>
+
+					</form>
+
+				</div>
+
+				<ng-template #popContent>
+					<div class="row">
+						<div class="col-12 col-lg-6">
+							<button class="btn btn-outline-danger" (click)="startRecording(false)">
+								<fa-icon class="me-2" [icon]="['fas', 'house-laptop']"></fa-icon>Iniciar gravação local
+							</button>
+						</div>
+						<div class="col-12 col-lg-6">
+							<span [disableTooltip]="isLoggedIn" ngbTooltip="Faça login para salvar na nuvem" class="d-inline-block">
+								<button [disabled]="!isLoggedIn" class="btn btn-outline-danger" (click)="startRecording(true)">
+									<fa-icon class="me-2" [icon]="['fas', 'cloud-arrow-up']"></fa-icon>Iniciar gravação na nuvem
+								</button>
+							</span>
+						</div>
+					</div>
+				</ng-template>
+
+				<div *ngIf="recordings.length > 0">
+					<hr class="my-5">
+
+					<h5>Gravações anteriores</h5>
+
+					<div class="row">
+						<div *ngFor="let recording of recordings" class="col-12 col-md-6">
+							<div class="card my-3">
+								<div class="card-header header-dark d-flex align-items-center justify-content-between py-2">
+									<div>
+										{{ formatDate(recording.createdAt) }}
+									</div>
+									<div>
+										<button #downloadBtn (click)="downloadRecording(recording, downloadBtn)" class="btn btn-outline-info mx-1" ngbTooltip="Download"><fa-icon [icon]="['fas', 'download']"></fa-icon></button>
+										<button #removeBtn (click)="removeRecording(recording, removeBtn)" class="btn btn-outline-danger mx-1" ngbTooltip="Remover"><fa-icon [icon]="['fas', 'trash']"></fa-icon></button>
+									</div>
+								</div>
+								<div class="card-body">
+									<video controls class="w-100" [src]="baseUrl + '/recordings/' + userId + '/' + recording.id + '.webm'"></video>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="card-body text-center" *ngIf="mediaRecorder?.state === 'recording'">
+				<div class="mb-2">
+					<span class="recording me-2"></span>
+					<span>{{ recordingDuration }}</span>
+				</div>
+				<button class="btn btn-danger" (click)="stopRecording()">
+					<fa-icon class="me-2" [icon]="['fas', 'circle-stop']"></fa-icon>Parar gravação
+				</button>
+			</div>
+		</div>
+	</section>
+</div>

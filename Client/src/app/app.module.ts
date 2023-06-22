@@ -6,26 +6,54 @@ import { AppComponent } from './app.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { HomeComponent } from './home/home.component';
 import { FaIconLibrary, FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-import { faCheck } from '@fortawesome/free-solid-svg-icons';
+import { faCashRegister, faCheck, faCircleStop, faCloudArrowUp, faComputer, faDownload, faHouseLaptop, faServer, faTrash, faVideo, faWallet } from '@fortawesome/free-solid-svg-icons';
+import { HeaderComponent } from './header/header.component';
+import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
+import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
+import { AuthInterceptor } from './services/auth.interceptor';
+import { LoginComponent } from './login/login.component';
+import { ReactiveFormsModule } from '@angular/forms';
+import { RegisterComponent } from './register/register.component';
+import { LogoutComponent } from './logout/logout.component';
 
 @NgModule({
-  declarations: [
-    AppComponent,
-    HomeComponent
-  ],
-  imports: [
-    BrowserModule,
-    AppRoutingModule,
-    BrowserAnimationsModule,
-    FontAwesomeModule
-  ],
-  providers: [],
-  bootstrap: [AppComponent]
+	declarations: [
+		AppComponent,
+		HomeComponent,
+		HeaderComponent,
+  LoginComponent,
+  RegisterComponent,
+  LogoutComponent
+	],
+	imports: [
+		BrowserModule,
+		AppRoutingModule,
+		BrowserAnimationsModule,
+		FontAwesomeModule,
+		NgbModule,
+		HttpClientModule,
+		ReactiveFormsModule
+	],
+	providers: [
+		AuthInterceptor,
+		{ provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
+	],
+	bootstrap: [AppComponent]
 })
 export class AppModule {
 	constructor(library: FaIconLibrary) {
 		library.addIcons(
-			faCheck
+			faVideo,
+			faComputer,
+			faServer,
+			faCloudArrowUp,
+			faHouseLaptop,
+			faCircleStop,
+			faCheck,
+			faWallet,
+			faCashRegister,
+			faDownload,
+			faTrash,
 		)
 	}
 }
