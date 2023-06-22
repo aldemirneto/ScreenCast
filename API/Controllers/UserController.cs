@@ -27,6 +27,8 @@ namespace API.Controllers {
 
 		[HttpPost("login")]
 		public async Task<IActionResult> Login([FromBody] UserLogin userLogin) {
+			userLogin.Email = userLogin.Email.ToLower();
+
 			var user = await _context.Users.Where(x => x.Email == userLogin.Email).SingleOrDefaultAsync();
 			if (user is null) {
 				return Unauthorized(new MessageViewModel("E-mail ou senha inválidos."));
@@ -41,6 +43,8 @@ namespace API.Controllers {
 
 		[HttpPost]
 		public async Task<IActionResult> Register([FromBody] UserRegister user) {
+			user.Email = user.Email.ToLower();
+
 			bool userExists = await _context.Users.Where(x => x.Email == user.Email).AnyAsync();
 			if (userExists) {
 				return BadRequest(new MessageViewModel("E-mail já cadastrado."));

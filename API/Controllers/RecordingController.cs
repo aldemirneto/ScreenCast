@@ -12,9 +12,11 @@ namespace API.Controllers {
 	[ApiController]
 	public class RecordingController : ControllerBase {
 		private readonly PostgresContext _context;
+		private readonly ILogger<RecordingController> _logger;
 
-		public RecordingController(PostgresContext context) {
+		public RecordingController(PostgresContext context, ILogger<RecordingController> logger) {
 			_context = context;
+			_logger = logger;
 		}
 
 		[HttpGet]
@@ -34,12 +36,13 @@ namespace API.Controllers {
 
 		[HttpPost]
 		[Authorize]
+		[DisableRequestSizeLimit]
 		public async Task<IActionResult> CreateFile([FromForm] IFormFile file) {
 			Guid userId = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? throw new ArgumentNullException(nameof(ClaimTypes.NameIdentifier), "Cannot get user UUID from JWT."));
 
 			var user = await _context.Users.FindAsync(userId) ?? throw new Exception("User not found");
 
-			if (user.IsSubscribed == false && file.Length > 100) {
+			if (user.IsSubscribed == false && file.Length > 209715200) {
 				return Unauthorized(new MessageViewModel("Assine o serviço para salvar vídeos com mais de 200MB."));
 			}
 
@@ -66,6 +69,31 @@ namespace API.Controllers {
 			await _context.SaveChangesAsync();
 
 			return Ok(new { videoId });
+		}
+
+		[HttpDelete("{id:guid}")]
+		[Authorize]
+		public async Task<IActionResult> RemoveRecording(Guid id) {
+			Guid userId = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? throw new ArgumentNullException(nameof(ClaimTypes.NameIdentifier), "Cannot get user UUID from JWT."));
+
+			// Remove recording
+			var recording = await _context.Recordings.Where(x => x.Id == id && x.UserId == userId).SingleOrDefaultAsync();
+			if (recording is null) {
+				return NotFound(new MessageViewModel("Gravação não encontrada."));
+			}
+
+			_context.Recordings.Remove(recording);
+			await _context.SaveChangesAsync();
+
+			try {
+				// Remove file
+				string filePath = $"{Environment.GetEnvironmentVariable("RecordingsBaseDir")}/{userId}/{id}.webm";
+				System.IO.File.Delete(filePath);
+			} catch (Exception e) {
+				_logger.LogError(e, "Failed to delete recording file {id}.", recording.Id);
+			}
+
+			return NoContent();
 		}
 	}
 }
