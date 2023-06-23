@@ -1,0 +1,29 @@
+name: API Deploy
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - API/**
+      - .github/workflows/api-deploy.yml
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Docker Login
+        uses: docker/login-action@v1.10.0
+        with:
+          username: ${{ secrets.DOCKER_HUB_LOGIN }}
+          password: ${{ secrets.DOCKER_HUB_PASSWORD }}
+
+      - name: Build and push Docker images
+        uses: docker/build-push-action@v2.7.0
+        with:
+          push: true
+          tags: muriloajacon/screen-cast-api:latest
+          file: ./API/Dockerfile
+          context: ./API/
