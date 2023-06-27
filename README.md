@@ -6,7 +6,6 @@ ScreenCastPro é uma solução para gravação de tela que permite aos usuários
 
 - Gravação de tela para o disco local
 - Gravação de tela no servidor
-- Gravação da webcam do usuário junto com a gravação de tela
 - Gravação do microfone do usuário junto com a gravação de tela
 - Criação de conta para armazenamento de vídeos no servidor e acesso a recursos adicionais
 - Login em conta
