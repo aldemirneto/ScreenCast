@@ -1,5 +1,3 @@
----
-
 ## API Documentation
 
 ### POST /api/User/login
@@ -80,5 +78,3 @@
 
     - Status Code: 200
     - Description: Success
-
----
