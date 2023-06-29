@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, HostListener, OnInit } from '@angular/core';
 import { DateTime } from 'luxon';
 import { RecordingServiceService } from '../services/recording-service.service';
 import { HttpEvent, HttpEventType } from '@angular/common/http';
@@ -52,6 +52,8 @@ export class HomeComponent implements OnInit {
 	public recordMicForm: FormGroup;
 
 	public baseUrl: string = environment.baseUrl;
+
+	public showUnsupportedBanner: boolean = false;
 	
 	constructor(_formBuilder: FormBuilder, private recordingService: RecordingServiceService, private tokenService: TokenService, private userService: UserService) {
 		this.recordMicForm = _formBuilder.group({
@@ -75,6 +77,10 @@ export class HomeComponent implements OnInit {
 		if (this.isLoggedIn) {
 			this.loadRecordings();		
 		}
+
+		if (navigator.mediaDevices.getDisplayMedia === undefined) {
+			this.showUnsupportedBanner = true;
+		}
 	}
 
 	loadRecordings() {
@@ -89,47 +95,56 @@ export class HomeComponent implements OnInit {
 	}
 
 	async startRecording(isServerRecording: boolean) {
-		this.isServerRecording = isServerRecording;
-		this.showUploadSuccess = false;
-		this.hasBeenSaved = false;
-		
-		let audioStreams: MediaStreamTrack[] = [];
-		const micControls = this.recordMicForm.controls;
-		if (micControls['recordMic'].value) {
-			const mediaConstraints: MediaStreamConstraints = {
-				audio: {
-					echoCancellation: micControls['echoCancellation'].value,
-					noiseSuppression: micControls['noiseSuppression'].value,
-					sampleRate: 44100,
-				}
-			};
-
-			try {
-				audioStreams = (await navigator.mediaDevices.getUserMedia(mediaConstraints)).getTracks();
-			} catch (error) {
-				Swal.fire('Ocorreu um erro', 'Permissão para utilizar o microfone não concedida.', 'error');
+		try {
+			if (navigator.mediaDevices.getDisplayMedia === undefined) {
+				Swal.fire('Ocorreu um erro', 'Este navegador não suporta a captura de tela.', 'error');
 				return;
 			}
-		}
-
-		const displayStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
-		displayStream.addEventListener('inactive', () => {
-			this.stopRecording();
-		});
-
-		this.recordedChunks = [];
-
-		const combinedStream = new MediaStream([...displayStream.getTracks(), ...audioStreams]);
-
-		this.mediaRecorder = new MediaRecorder(combinedStream, { mimeType: 'video/webm; codecs=vp9' });
-		this.mediaRecorder.ondataavailable = (event) => {
-			if (event.data && event.data.size > 0) {
-				this.recordedChunks.push(event.data);
+	
+			this.isServerRecording = isServerRecording;
+			this.showUploadSuccess = false;
+			this.hasBeenSaved = false;
+			
+			let audioStreams: MediaStreamTrack[] = [];
+			const micControls = this.recordMicForm.controls;
+			if (micControls['recordMic'].value) {
+				const mediaConstraints: MediaStreamConstraints = {
+					audio: {
+						echoCancellation: micControls['echoCancellation'].value,
+						noiseSuppression: micControls['noiseSuppression'].value,
+						sampleRate: 44100,
+					}
+				};
+	
+				try {
+					audioStreams = (await navigator.mediaDevices.getUserMedia(mediaConstraints)).getTracks();
+				} catch (error) {
+					Swal.fire('Ocorreu um erro', 'Permissão para utilizar o microfone não concedida.', 'error');
+					return;
+				}
 			}
-		};
-		this.mediaRecorder.onstop = this.stopRecording.bind(this);
-		this.mediaRecorder.start(200);
-		this.startedAt = DateTime.now();
+	
+			const displayStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+			displayStream.addEventListener('inactive', () => {
+				this.stopRecording();
+			});
+	
+			this.recordedChunks = [];
+	
+			const combinedStream = new MediaStream([...displayStream.getTracks(), ...audioStreams]);
+	
+			this.mediaRecorder = new MediaRecorder(combinedStream, { mimeType: 'video/webm; codecs=vp9' });
+			this.mediaRecorder.ondataavailable = (event) => {
+				if (event.data && event.data.size > 0) {
+					this.recordedChunks.push(event.data);
+				}
+			};
+			this.mediaRecorder.onstop = this.stopRecording.bind(this);
+			this.mediaRecorder.start(200);
+			this.startedAt = DateTime.now();
+		} catch (error) {
+			Swal.fire('Ocorreu um erro', 'Não foi possível iniciar a gravação.', 'error');
+		}
 	}
 
 	saveRecording() {
@@ -137,35 +152,91 @@ export class HomeComponent implements OnInit {
 		const blob = new Blob(this.recordedChunks, { type: 'video/webm' });
 
 		if (this.isServerRecording) {
-			this.isUploading = true;
-			this.uploadProgress = 0;
-
-			this.recordingService.uploadFile(blob).pipe(
-				tap(message => this.showProgress(message)),
-				last(),
-				catchError(error => {
-					Swal.fire('Ocorreu um erro', error.error.message ?? 'Não foi possível salvar a gravação', 'error');
-					this.isUploading = false;
-					return error;
-				})
-				).subscribe({
-					next: () => {
-						console.log('upload complete');
-						this.isUploading = false;
-						this.showUploadSuccess = true;
-
-						this.loadRecordings();
+			if (blob.size > 209715200 && this.isSubscribed === false) {
+				Swal.fire({
+					title: 'Gravação muito grande',
+					text: 'Você só pode salvar gravações de até 200MB. Para salvar gravações maiores, assine o plano premium.',
+					icon: 'warning',
+					showCancelButton: true,
+					confirmButtonText: 'Assinar',
+					cancelButtonText: 'Cancelar',
+					confirmButtonColor: '#3085d6',
+					cancelButtonColor: '#d33',
+				}).then((result) => {
+					if (result.isConfirmed) {
+						this.userService.subscribe().subscribe({
+							next: () => {
+								Swal.fire({
+									icon: 'success',
+									title: 'Assinatura realizada com sucesso! Salvando gravação...',
+									toast: true,
+									position: 'top-end',
+									timer: 5000,
+									timerProgressBar: true,
+									showConfirmButton: false
+								});
+								this.tokenService.setUserSubscribed();
+								this.uploadRecording(blob);
+							},
+							error: (error) => {
+								Swal.fire('Ocorreu um erro', 'Não foi possível assinar o serviço, tente novamente mais tarde.', 'error');
+							}
+						});
 					}
 				});
+			} else {
+				this.uploadRecording(blob);
+			}
+
 		} else {
-			const url = window.URL.createObjectURL(blob);
-			const a = document.createElement('a');
-			a.href = url;
-			a.download = 'screen-recording.webm';
-			document.body.appendChild(a);
-			a.click();
-			window.URL.revokeObjectURL(url);
+			this.saveBlob(blob);
 		}
+	}
+
+	saveBlob(blob: Blob) {
+		const url = window.URL.createObjectURL(blob);
+		const a = document.createElement('a');
+		a.href = url;
+		a.download = 'screen-recording.webm';
+		document.body.appendChild(a);
+		a.click();
+		window.URL.revokeObjectURL(url);
+	}
+
+	uploadRecording(blob: Blob) {
+		this.isUploading = true;
+		this.uploadProgress = 0;
+
+		this.recordingService.uploadFile(blob).pipe(
+			tap(message => this.showProgress(message)),
+			last(),
+			catchError(error => {
+				let errorTxt = error.error.message ?? 'Não foi possível salvar a gravação.';
+				errorTxt += ' Deseja salvar a gravação localmente?';
+				Swal.fire({
+					title: 'Ocorreu um erro',
+					text: errorTxt,
+					icon: 'error',
+					showCancelButton: true,
+					confirmButtonText: 'Salvar',
+					cancelButtonText: 'Fechar'
+				}).then((result) => {
+					if (result.isConfirmed) {
+						this.saveBlob(blob);
+					}
+				});
+				this.isUploading = false;
+				return error;
+			})
+			).subscribe({
+				next: () => {
+					console.log('upload complete');
+					this.isUploading = false;
+					this.showUploadSuccess = true;
+
+					this.loadRecordings();
+				}
+			});
 	}
 
 	showProgress(message: HttpEvent<unknown>) {
@@ -194,7 +265,7 @@ export class HomeComponent implements OnInit {
 				this.tokenService.setUserSubscribed();
 			},
 			error: (error) => {
-				Swal.fire('Ocorreu um erro', 'Não possível assinar o serviço, tente novamente mais tarde.', 'error');
+				Swal.fire('Ocorreu um erro', 'Não foi possível assinar o serviço, tente novamente mais tarde.', 'error');
 			}
 		});
 	}
@@ -254,5 +325,13 @@ export class HomeComponent implements OnInit {
 					btnLoading.remove();
 				}
 			});
+	}
+
+	@HostListener('window:beforeunload', ['$event'])
+	handleClose($event: any) {
+		const preventClose = this.mediaRecorder?.state == 'recording' || this.isUploading;
+		if (preventClose) {
+			$event.returnValue = preventClose;
+		}
 	}
 }

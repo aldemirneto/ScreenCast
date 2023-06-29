@@ -6,7 +6,7 @@ import { AppComponent } from './app.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { HomeComponent } from './home/home.component';
 import { FaIconLibrary, FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-import { faCashRegister, faCheck, faCircleStop, faCloudArrowUp, faComputer, faDownload, faHouseLaptop, faServer, faTrash, faVideo, faWallet } from '@fortawesome/free-solid-svg-icons';
+import { faCashRegister, faCheck, faCircleStop, faCloudArrowUp, faComputer, faDownload, faExclamationTriangle, faHouseLaptop, faServer, faTrash, faVideo, faWallet } from '@fortawesome/free-solid-svg-icons';
 import { HeaderComponent } from './header/header.component';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
@@ -15,15 +15,17 @@ import { LoginComponent } from './login/login.component';
 import { ReactiveFormsModule } from '@angular/forms';
 import { RegisterComponent } from './register/register.component';
 import { LogoutComponent } from './logout/logout.component';
+import { UnsupportedBrowserComponent } from './unsupported-browser/unsupported-browser.component';
 
 @NgModule({
 	declarations: [
 		AppComponent,
 		HomeComponent,
 		HeaderComponent,
-  LoginComponent,
-  RegisterComponent,
-  LogoutComponent
+		LoginComponent,
+		RegisterComponent,
+		LogoutComponent,
+		UnsupportedBrowserComponent
 	],
 	imports: [
 		BrowserModule,
@@ -54,6 +56,7 @@ export class AppModule {
 			faCashRegister,
 			faDownload,
 			faTrash,
+			faExclamationTriangle,
 		)
 	}
 }

@@ -54,13 +54,13 @@
 				<ng-template #popContent>
 					<div class="row">
 						<div class="col-12 col-lg-6">
-							<button class="btn btn-outline-danger" (click)="startRecording(false)">
+							<button class="btn btn-outline-danger w-100" (click)="startRecording(false)">
 								<fa-icon class="me-2" [icon]="['fas', 'house-laptop']"></fa-icon>Iniciar gravação local
 							</button>
 						</div>
-						<div class="col-12 col-lg-6">
-							<span [disableTooltip]="isLoggedIn" ngbTooltip="Faça login para salvar na nuvem" class="d-inline-block">
-								<button [disabled]="!isLoggedIn" class="btn btn-outline-danger" (click)="startRecording(true)">
+						<div class="col-12 col-lg-6 mt-2 mt-lg-0">
+							<span [disableTooltip]="isLoggedIn" ngbTooltip="Faça login para salvar na nuvem" class="d-inline-block w-100">
+								<button [disabled]="!isLoggedIn" class="btn btn-outline-danger w-100" (click)="startRecording(true)">
 									<fa-icon class="me-2" [icon]="['fas', 'cloud-arrow-up']"></fa-icon>Iniciar gravação na nuvem
 								</button>
 							</span>
@@ -106,3 +106,5 @@
 		</div>
 	</section>
 </div>
+
+<app-unsupported-browser *ngIf="showUnsupportedBanner" (close)="showUnsupportedBanner = false"></app-unsupported-browser>
