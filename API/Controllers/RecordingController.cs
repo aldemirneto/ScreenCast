@@ -24,8 +24,6 @@ namespace API.Controllers {
 		public async Task<IActionResult> GetRecordings() {
 			Guid userId = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? throw new ArgumentNullException(nameof(ClaimTypes.NameIdentifier), "Cannot get user UUID from JWT."));
 
-			var user = await _context.Users.FindAsync(userId) ?? throw new Exception("User not found");
-
 			var recordings = await _context.Recordings.OrderByDescending(x => x.CreatedAt).Where(x => x.UserId == userId).Select(x => new {
 				x.Id,
 				x.CreatedAt
